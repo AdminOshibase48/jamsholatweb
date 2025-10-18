@@ -3,166 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jam Sholat Digital - Masjid Al-Furqan</title>
+    <title>MASJID AL-FUROAN - Jadwal Sholat</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Background dengan foto masjid -->
-    <div class="background-container">
-        <div class="background-overlay"></div>
-        <div class="background-image" id="background-image"></div>
-    </div>
-
-    <!-- Container Utama -->
     <div class="container">
-        <!-- Header dengan Nama Masjid -->
-        <header class="header">
-            <h1 class="masjid-name">MASJID AL-FURQAN</h1>
-            <div class="location-info">
-                <span id="location-name">Jakarta</span>
-                <span class="separator">—</span>
-                <span id="timezone">WIB</span>
-            </div>
+        <header>
+            <h1>MASJID AL-FUROAN</h1>
+            <h2>JADWAL SHOLAT</h2>
+            <p class="date">Senin, 18 Oktober 2021</p>
         </header>
 
-        <!-- Konten Utama -->
-        <main class="main-content">
-            <!-- Panel Jadwal Sholat (Kiri) -->
-            <div class="prayer-panel">
-                <div class="prayer-header">
-                    <h2>JADWAL SHOLAT</h2>
-                    <div class="today-date" id="today-date">Senin, 18 Oktober 2023</div>
+        <main>
+            <div class="prayer-times">
+                <div class="time-item">
+                    <span class="prayer-name">SUBUH</span>
+                    <span class="prayer-time">04:38</span>
                 </div>
-                
-                <div class="prayer-times">
-                    <div class="prayer-item" id="subuh">
-                        <div class="prayer-name">SUBUH</div>
-                        <div class="prayer-time" id="subuh-time">04:30</div>
-                        <div class="prayer-status" id="subuh-status"></div>
-                    </div>
-                    
-                    <div class="prayer-item" id="terbit">
-                        <div class="prayer-name">TERBIT</div>
-                        <div class="prayer-time" id="terbit-time">05:45</div>
-                        <div class="prayer-status" id="terbit-status"></div>
-                    </div>
-                    
-                    <div class="prayer-item" id="dzuhur">
-                        <div class="prayer-name">DZUHUR</div>
-                        <div class="prayer-time" id="dzuhur-time">11:55</div>
-                        <div class="prayer-status" id="dzuhur-status"></div>
-                    </div>
-                    
-                    <div class="prayer-item" id="ashar">
-                        <div class="prayer-name">ASHAR</div>
-                        <div class="prayer-time" id="ashar-time">15:10</div>
-                        <div class="prayer-status" id="ashar-status"></div>
-                    </div>
-                    
-                    <div class="prayer-item" id="maghrib">
-                        <div class="prayer-name">MAGHRIB</div>
-                        <div class="prayer-time" id="maghrib-time">18:05</div>
-                        <div class="prayer-status" id="maghrib-status"></div>
-                    </div>
-                    
-                    <div class="prayer-item" id="isya">
-                        <div class="prayer-name">ISYA</div>
-                        <div class="prayer-time" id="isya-time">19:20</div>
-                        <div class="prayer-status" id="isya-status"></div>
-                    </div>
+                <div class="time-item">
+                    <span class="prayer-name">TERBIT</span>
+                    <span class="prayer-time">05:46</span>
+                </div>
+                <div class="time-item">
+                    <span class="prayer-name">DZUHUR</span>
+                    <span class="prayer-time">11:55</span>
+                </div>
+                <div class="time-item">
+                    <span class="prayer-name">ASHAR</span>
+                    <span class="prayer-time">15:16</span>
+                </div>
+                <div class="time-item highlight">
+                    <span class="prayer-name">MAGHRIB</span>
+                    <span class="prayer-time">18:05</span>
+                    <span class="hijri-date">27 Rabiul Akhir 1447 H</span>
+                </div>
+                <div class="time-item">
+                    <span class="prayer-name">ISYA</span>
+                    <span class="prayer-time">19:29</span>
                 </div>
             </div>
 
-            <!-- Panel Jam (Tengah) -->
-            <div class="clock-panel">
-                <!-- Jam Digital Kecil -->
-                <div class="digital-clock-small">
-                    <span id="digital-hours">00</span>
-                    <span class="colon">:</span>
-                    <span id="digital-minutes">00</span>
-                    <span class="colon">:</span>
-                    <span id="digital-seconds">00</span>
-                </div>
-
-                <!-- Jam Analog Besar -->
-                <div class="analog-clock">
-                    <div class="clock-face">
-                        <!-- Markers -->
-                        <div class="marker marker-12">12</div>
-                        <div class="marker marker-3">3</div>
-                        <div class="marker marker-6">6</div>
-                        <div class="marker marker-9">9</div>
-                        
-                        <!-- Hands -->
-                        <div class="hand hour-hand" id="hour-hand"></div>
-                        <div class="hand minute-hand" id="minute-hand"></div>
-                        <div class="hand second-hand" id="second-hand"></div>
-                        
-                        <!-- Center dot -->
-                        <div class="center-dot"></div>
-                    </div>
-                </div>
-
-                <!-- Tanggal Hijriah -->
-                <div class="hijri-date" id="hijri-date">
-                    2 Rabiul Awal 1445 H
-                </div>
+            <div class="additional-info">
+                <p>Dengan memohon ridho Allah SWT, kami menginformasikan jadwal sholat</p>
             </div>
         </main>
 
-        <!-- Footer dengan Quote Berjalan -->
-        <footer class="footer">
-            <div class="quote-marquee">
-                <div class="quote-text" id="quote-text">
-                    "Sebaik-baik kalian adalah yang belajar Al-Qur'an dan mengajarkannya."
-                </div>
-            </div>
+        <footer>
+            <p>MASJID AL-FUROAN</p>
         </footer>
-    </div>
-
-    <!-- Kontrol Panel -->
-    <div class="control-panel">
-        <div class="control-group">
-            <label for="city-selector">Pilih Kota:</label>
-            <select id="city-selector">
-                <option value="">Loading kota...</option>
-            </select>
-        </div>
-        
-        <div class="control-group">
-            <label for="background-selector">Background:</label>
-            <select id="background-selector">
-                <option value="1">Masjid Modern</option>
-                <option value="2">Masjid Nabawi</option>
-            </select>
-        </div>
-        
-        <div class="control-buttons">
-            <button id="fullscreen-btn" class="control-btn">
-                <i class="fas fa-expand"></i> Fullscreen
-            </button>
-            <button id="refresh-btn" class="control-btn">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-        </div>
-    </div>
-
-    <!-- Notifikasi Waktu Sholat -->
-    <div id="prayer-notification" class="notification hidden">
-        <div class="notification-content">
-            <div class="notification-icon">
-                <i class="fas fa-mosque"></i>
-            </div>
-            <div class="notification-text">
-                <h3>Waktu Sholat</h3>
-                <p id="notification-message">Sudah masuk waktu Maghrib</p>
-            </div>
-            <button id="close-notification" class="close-btn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
     </div>
 
     <script src="script.js"></script>
