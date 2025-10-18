@@ -4,7 +4,7 @@ let prayerTimes = {};
 let currentTime = new Date();
 let timezoneOffset = 7; // Default WIB
 
-// Daftar kota Indonesia (ID dari API MyQuran)
+// Daftar kota Indonesia (ID dari API MyQuran v2)
 const cities = {
     '1301': { name: 'Jakarta', timezone: 'WIB' },
     '1871': { name: 'Bandung', timezone: 'WIB' },
@@ -172,24 +172,37 @@ function changeBackground(backgroundId) {
     }
 }
 
-// Load Jadwal Sholat dari API
+// Load Jadwal Sholat dari API MyQuran v2 - FIXED
 async function loadPrayerTimes() {
-    const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-    const apiUrl = `https://api.myquran.com/v1/sholat/jadwal/${currentCityId}/${today}`;
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    // Menggunakan API v2 yang benar
+    const apiUrl = `https://api.myquran.com/v2/sholat/jadwal/${currentCityId}/${year}/${month}/${day}`;
     
     try {
+        console.log('Fetching prayer times from:', apiUrl);
         const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.status && data.data) {
             prayerTimes = data.data.jadwal;
             updatePrayerDisplay();
+            console.log('Prayer times loaded successfully:', prayerTimes);
         } else {
-            setFallbackPrayerTimes();
+            throw new Error('Invalid API response format');
         }
     } catch (error) {
         console.error('Error fetching prayer times:', error);
         setFallbackPrayerTimes();
+        showTemporaryNotification('Menggunakan data sholat offline');
     }
 }
 
@@ -297,6 +310,40 @@ function showPrayerNotification(prayerName, prayerTime) {
     }, 30000);
 }
 
+// Notifikasi Sementara
+function showTemporaryNotification(message) {
+    // Buat elemen notifikasi sementara
+    const tempNotification = document.createElement('div');
+    tempNotification.className = 'notification';
+    tempNotification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="notification-text">
+                <p>${message}</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(tempNotification);
+    
+    // Animasi masuk
+    setTimeout(() => {
+        tempNotification.style.opacity = '1';
+        tempNotification.style.transform = 'translate(-50%, -50%) scale(1)';
+    }, 10);
+    
+    // Hapus setelah 3 detik
+    setTimeout(() => {
+        tempNotification.style.opacity = '0';
+        tempNotification.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        setTimeout(() => {
+            document.body.removeChild(tempNotification);
+        }, 300);
+    }, 3000);
+}
+
 // Update Quote Islami
 function updateQuote() {
     const randomQuote = islamicQuotes[Math.floor(Math.random() * islamicQuotes.length)];
@@ -312,4 +359,14 @@ document.addEventListener('visibilitychange', function() {
         updateClock();
         loadPrayerTimes();
     }
+});
+
+// Handle Online/Offline Status
+window.addEventListener('online', function() {
+    loadPrayerTimes();
+    showTemporaryNotification('Koneksi pulih, memperbarui data sholat');
+});
+
+window.addEventListener('offline', function() {
+    showTemporaryNotification('Koneksi terputus, menggunakan data offline');
 });
