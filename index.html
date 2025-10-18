@@ -3,70 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Sholat - Masjid Al-Furoan</title>
+    <title>Jadwal Sholat</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>MASJID AL-FUROAN</h1>
-            <div class="date-info">
-                <h2>JADWAL SHOLAT</h2>
-                <p id="current-date">Senin, 18 Oktober 2021</p>
-            </div>
+        <header class="header">
+            <h1 class="title">Jadwal Sholat</h1>
+            <div class="date-display" id="currentDate"></div>
         </header>
-
-        <main>
+        
+        <main class="main-content">
+            <div class="city-selector">
+                <label for="citySelect">Pilih Kota:</label>
+                <select id="citySelect">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+            
             <div class="prayer-times">
-                <div class="time-card">
-                    <h3>SUBUH</h3>
-                    <div class="time">04:38</div>
+                <div class="prayer-card" id="subuh">
+                    <h3>Subuh</h3>
+                    <div class="time" id="subuhTime">--:--</div>
                 </div>
-                <div class="time-card">
-                    <h3>TERBIT</h3>
-                    <div class="time">05:46</div>
+                <div class="prayer-card" id="dzuhur">
+                    <h3>Dzuhur</h3>
+                    <div class="time" id="dzuhurTime">--:--</div>
                 </div>
-                <div class="time-card">
-                    <h3>DZUHUR</h3>
-                    <div class="time">11:55</div>
+                <div class="prayer-card" id="ashar">
+                    <h3>Ashar</h3>
+                    <div class="time" id="asharTime">--:--</div>
                 </div>
-                <div class="time-card">
-                    <h3>ASHAR</h3>
-                    <div class="time">15:06</div>
+                <div class="prayer-card" id="maghrib">
+                    <h3>Maghrib</h3>
+                    <div class="time" id="maghribTime">--:--</div>
                 </div>
-                <div class="time-card active">
-                    <h3>MAGHRIB</h3>
-                    <div class="time">18:05</div>
-                    <div class="hijri-date">27 Rabiul Akhir 1447 H</div>
-                </div>
-                <div class="time-card">
-                    <h3>ISYA</h3>
-                    <div class="time">19:29</div>
+                <div class="prayer-card" id="isya">
+                    <h3>Isya</h3>
+                    <div class="time" id="isyaTime">--:--</div>
                 </div>
             </div>
-
-            <div class="next-prayer">
-                <div class="next-prayer-info">
-                    <h3>Sholat Berikutnya</h3>
-                    <div class="next-prayer-name">ISYA</div>
-                    <div class="countdown">
-                        <span id="hours">01</span>:<span id="minutes">24</span>:<span id="seconds">38</span>
-                    </div>
+            
+            <div class="mosque-images">
+                <div class="image-container">
+                    <img src="https://cdn.pixabay.com/photo/2018/09/09/14/32/u-a-e-3664712_1280.jpg" alt="Masjid 1" class="mosque-img">
                 </div>
-            </div>
-
-            <div class="location-info">
-                <p><i class="fas fa-map-marker-alt"></i> Lokasi: Masjid Al-Furoan, Seabru</p>
+                <div class="image-container">
+                    <img src="https://cdn.pixabay.com/photo/2020/02/20/03/24/nabawi-mosque-4863805_960_720.jpg" alt="Masjid 2" class="mosque-img">
+                </div>
             </div>
         </main>
-
-        <footer>
-            <p>Semoga ibadah kita diterima Allah SWT</p>
-        </footer>
     </div>
-
+    
     <script src="script.js"></script>
 </body>
 </html>
