@@ -50,6 +50,7 @@
                             SUBUH
                         </div>
                         <div class="prayer-time" id="subuhTime">04:30</div>
+                        <div class="countdown-badge" id="subuhCountdown"></div>
                         <div class="prayer-highlight"></div>
                     </div>
                     
@@ -59,6 +60,7 @@
                             DZUHUR
                         </div>
                         <div class="prayer-time" id="dzuhurTime">12:00</div>
+                        <div class="countdown-badge" id="dzuhurCountdown"></div>
                         <div class="prayer-highlight"></div>
                     </div>
                     
@@ -68,6 +70,7 @@
                             ASHAR
                         </div>
                         <div class="prayer-time" id="asharTime">15:30</div>
+                        <div class="countdown-badge" id="asharCountdown"></div>
                         <div class="prayer-highlight"></div>
                     </div>
                     
@@ -77,6 +80,7 @@
                             MAGHRIB
                         </div>
                         <div class="prayer-time" id="maghribTime">18:15</div>
+                        <div class="countdown-badge" id="maghribCountdown"></div>
                         <div class="prayer-highlight"></div>
                     </div>
                     
@@ -86,6 +90,7 @@
                             ISYA
                         </div>
                         <div class="prayer-time" id="isyaTime">19:30</div>
+                        <div class="countdown-badge" id="isyaCountdown"></div>
                         <div class="prayer-highlight"></div>
                     </div>
                 </div>
@@ -119,7 +124,7 @@
                 <div class="scroll-text">
                     <marquee behavior="scroll" direction="left">
                         Jadwal sholat ini menggunakan API dari myQuran.com • Selamat menunaikan ibadah sholat •
-                        Semoga kita selalu dalam lindungan Allah SWT • Website Ini Dibuat Oleh Nursyam Web Developer
+                        Semoga kita selalu dalam lindungan Allah SWT • Jadwal sholat ini menggunakan API dari myQuran.com
                     </marquee>
                 </div>
             </footer>
@@ -128,6 +133,40 @@
         <!-- Efek scanlines TV -->
         <div class="scanlines"></div>
     </div>
+
+    <!-- Popup Notifikasi Adzan -->
+    <div id="adzanNotification" class="adzan-notification">
+        <div class="notification-content">
+            <div class="notification-header">
+                <i class="fas fa-bell"></i>
+                <h3>Pengingat Sholat</h3>
+                <button class="close-btn" id="closeNotification">&times;</button>
+            </div>
+            <div class="notification-body">
+                <div class="prayer-info">
+                    <i class="fas fa-mosque" id="notificationIcon"></i>
+                    <div class="prayer-details">
+                        <div class="prayer-name" id="notificationPrayer">SHOLAT SUBUH</div>
+                        <div class="countdown-text" id="notificationCountdown">10 menit lagi</div>
+                    </div>
+                </div>
+                <div class="audio-controls">
+                    <button id="playAdzan" class="audio-btn">
+                        <i class="fas fa-play"></i> Putar Adzan
+                    </button>
+                    <button id="stopAdzan" class="audio-btn stop">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="adzanAudio" loop>
+        <source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
 
     <script src="script.js"></script>
 </body>
