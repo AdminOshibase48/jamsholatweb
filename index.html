@@ -3,53 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASJID AL-FUROAN - Jadwal Sholat</title>
+    <title>Jadwal Sholat - Masjid Al-Furoan</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>MASJID AL-FUROAN</h1>
-            <h2>JADWAL SHOLAT</h2>
-            <p class="date">Senin, 18 Oktober 2021</p>
+            <div class="date-info">
+                <h2>JADWAL SHOLAT</h2>
+                <p id="current-date">Senin, 18 Oktober 2021</p>
+            </div>
         </header>
 
         <main>
             <div class="prayer-times">
-                <div class="time-item">
-                    <span class="prayer-name">SUBUH</span>
-                    <span class="prayer-time">04:38</span>
+                <div class="time-card">
+                    <h3>SUBUH</h3>
+                    <div class="time">04:38</div>
                 </div>
-                <div class="time-item">
-                    <span class="prayer-name">TERBIT</span>
-                    <span class="prayer-time">05:46</span>
+                <div class="time-card">
+                    <h3>TERBIT</h3>
+                    <div class="time">05:46</div>
                 </div>
-                <div class="time-item">
-                    <span class="prayer-name">DZUHUR</span>
-                    <span class="prayer-time">11:55</span>
+                <div class="time-card">
+                    <h3>DZUHUR</h3>
+                    <div class="time">11:55</div>
                 </div>
-                <div class="time-item">
-                    <span class="prayer-name">ASHAR</span>
-                    <span class="prayer-time">15:16</span>
+                <div class="time-card">
+                    <h3>ASHAR</h3>
+                    <div class="time">15:06</div>
                 </div>
-                <div class="time-item highlight">
-                    <span class="prayer-name">MAGHRIB</span>
-                    <span class="prayer-time">18:05</span>
-                    <span class="hijri-date">27 Rabiul Akhir 1447 H</span>
+                <div class="time-card active">
+                    <h3>MAGHRIB</h3>
+                    <div class="time">18:05</div>
+                    <div class="hijri-date">27 Rabiul Akhir 1447 H</div>
                 </div>
-                <div class="time-item">
-                    <span class="prayer-name">ISYA</span>
-                    <span class="prayer-time">19:29</span>
+                <div class="time-card">
+                    <h3>ISYA</h3>
+                    <div class="time">19:29</div>
                 </div>
             </div>
 
-            <div class="additional-info">
-                <p>Dengan memohon ridho Allah SWT, kami menginformasikan jadwal sholat</p>
+            <div class="next-prayer">
+                <div class="next-prayer-info">
+                    <h3>Sholat Berikutnya</h3>
+                    <div class="next-prayer-name">ISYA</div>
+                    <div class="countdown">
+                        <span id="hours">01</span>:<span id="minutes">24</span>:<span id="seconds">38</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="location-info">
+                <p><i class="fas fa-map-marker-alt"></i> Lokasi: Masjid Al-Furoan, Seabru</p>
             </div>
         </main>
 
         <footer>
-            <p>MASJID AL-FUROAN</p>
+            <p>Semoga ibadah kita diterima Allah SWT</p>
         </footer>
     </div>
 
