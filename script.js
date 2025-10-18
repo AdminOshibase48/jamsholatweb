@@ -81,7 +81,7 @@ function setupEventListeners() {
 // Load Daftar Kota dari API
 async function loadCities() {
     try {
-        const response = await fetch('https://api.myquran.com/v1/sholat/kota/semua');
+        const response = await fetch('https://api.myquran.com/v2/sholat/kota/semua');
         
         if (response.ok) {
             const data = await response.json();
@@ -237,7 +237,7 @@ async function loadPrayerTimes() {
     const day = String(today.getDate()).padStart(2, '0');
     const date = `${year}/${month}/${day}`;
     
-    const apiUrl = `https://api.myquran.com/v1/sholat/jadwal/${currentCityId}/${date}`;
+    const apiUrl = `https://api.myquran.com/v2/sholat/jadwal/${currentCityId}/${date}`;
     
     try {
         console.log('Mengambil data dari:', apiUrl);
