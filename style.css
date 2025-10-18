@@ -1,315 +1,607 @@
-// Konfigurasi dan Variabel Global
-let currentCityId = '1301'; // Default: Jakarta
-let prayerTimes = {};
-let currentTime = new Date();
-let timezoneOffset = 7; // Default WIB
-
-// Daftar kota Indonesia (ID dari API MyQuran)
-const cities = {
-    '1301': { name: 'Jakarta', timezone: 'WIB' },
-    '1871': { name: 'Bandung', timezone: 'WIB' },
-    '3173': { name: 'Surabaya', timezone: 'WIB' },
-    '2171': { name: 'Medan', timezone: 'WIB' },
-    '5171': { name: 'Denpasar', timezone: 'WITA' },
-    '7371': { name: 'Makassar', timezone: 'WITA' },
-    '9271': { name: 'Jayapura', timezone: 'WIT' }
-};
-
-// Background images untuk masjid
-const backgroundImages = {
-    '1': 'https://images.unsplash.com/photo-1543362427-5afb5c4b2c43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    '2': 'https://images.unsplash.com/photo-1580330510113-812f89ea3173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    '3': 'https://images.unsplash.com/photo-1601599561213-832382fd07ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80',
-    '4': 'https://images.unsplash.com/photo-1566379078573-26ae3b236fa4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
-};
-
-// Quote Islami
-const islamicQuotes = [
-    "Sebaik-baik kalian adalah yang belajar Al-Qur'an dan mengajarkannya.",
-    "Sesungguhnya shalat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman.",
-    "Barangsiapa yang mengerjakan shalat dengan ikhlas karena Allah, maka shalat itu akan menjadi cahaya baginya.",
-    "Shalat adalah tiang agama, barangsiapa mendirikannya maka ia mendirikan agama, dan barangsiapa meninggalkannya maka ia meruntuhkan agama.",
-    "Amal yang pertama kali dihisab pada hari kiamat adalah shalat.",
-    "Shalat itu cahaya, sedekah itu bukti, sabar itu sinar, dan Al-Qur'an itu hujjah untukmu atau terhadapmu."
-];
-
-// Inisialisasi
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-    setInterval(updateClock, 1000);
-    setInterval(checkPrayerTime, 60000); // Cek setiap menit
-});
-
-// Inisialisasi Aplikasi
-function initializeApp() {
-    setupEventListeners();
-    updateLocationInfo();
-    loadPrayerTimes();
-    updateQuote();
-    updateDates();
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-// Setup Event Listeners
-function setupEventListeners() {
-    // Pilih kota
-    document.getElementById('city-selector').addEventListener('change', function(e) {
-        currentCityId = e.target.value;
-        updateLocationInfo();
-        loadPrayerTimes();
-    });
-    
-    // Pilih background
-    document.getElementById('background-selector').addEventListener('change', function(e) {
-        changeBackground(e.target.value);
-    });
-    
-    // Fullscreen
-    document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+:root {
+    --primary-purple: #6A1B9A;
+    --emerald-green: #00796B;
+    --soft-gold: #FFD54F;
+    --light-cyan: #80DEEA;
+    --dark-overlay: rgba(0, 0, 0, 0.6);
+    --card-bg: rgba(255, 255, 255, 0.15);
+    --text-white: #FFFFFF;
+    --text-gold: #FFD54F;
 }
 
-// Update Informasi Lokasi
-function updateLocationInfo() {
-    const city = cities[currentCityId];
-    if (city) {
-        document.getElementById('location-name').textContent = city.name;
-        document.getElementById('timezone').textContent = city.timezone;
-        
-        // Update timezone offset berdasarkan kota
-        if (city.timezone === 'WITA') timezoneOffset = 8;
-        else if (city.timezone === 'WIT') timezoneOffset = 9;
-        else timezoneOffset = 7;
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-white);
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Background Styles */
+.background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+}
+
+.background-image {
+    width: 100%;
+    height: 100%;
+    background-image: url('https://images.unsplash.com/photo-1543362427-5afb5c4b2c43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 1s ease-in-out;
+}
+
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(106, 27, 154, 0.3) 0%,
+        rgba(0, 121, 107, 0.3) 50%,
+        rgba(0, 0, 0, 0.6) 100%
+    );
+    backdrop-filter: blur(5px);
+}
+
+/* Container Utama */
+.container {
+    max-width: 1400px;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 30px;
+}
+
+.masjid-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--text-white);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+    letter-spacing: 3px;
+}
+
+.location-info {
+    font-size: 1.4rem;
+    color: var(--soft-gold);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.separator {
+    color: var(--light-cyan);
+}
+
+/* Konten Utama */
+.main-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 50px;
+    flex: 1;
+    align-items: center;
+}
+
+/* Panel Jadwal Sholat */
+.prayer-panel {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    height: fit-content;
+}
+
+.prayer-header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.prayer-header h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    color: var(--soft-gold);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.today-date {
+    font-size: 1.1rem;
+    color: var(--light-cyan);
+}
+
+.prayer-times {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.prayer-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 15px;
+    align-items: center;
+    padding: 15px 20px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.prayer-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    transition: all 0.3s ease;
+}
+
+.prayer-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+}
+
+.prayer-item.active {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 20px rgba(255, 213, 79, 0.3);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 213, 79, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(255, 213, 79, 0.5);
     }
 }
 
-// Update Jam
-function updateClock() {
-    currentTime = new Date();
-    
-    // Sesuaikan dengan timezone Indonesia
-    const utc = currentTime.getTime() + (currentTime.getTimezoneOffset() * 60000);
-    const indonesiaTime = new Date(utc + (3600000 * timezoneOffset));
-    
-    const hours = indonesiaTime.getHours().toString().padStart(2, '0');
-    const minutes = indonesiaTime.getMinutes().toString().padStart(2, '0');
-    const seconds = indonesiaTime.getSeconds().toString().padStart(2, '0');
-    
-    // Update jam digital
-    document.getElementById('digital-hours').textContent = hours;
-    document.getElementById('digital-minutes').textContent = minutes;
-    document.getElementById('digital-seconds').textContent = seconds;
-    
-    // Update jam analog
-    updateAnalogClock(indonesiaTime);
-    
-    // Update status sholat setiap menit
-    if (seconds === '00') {
-        updateCurrentPrayerStatus();
+/* Warna berbeda untuk setiap waktu sholat */
+#subuh::before { background: var(--primary-purple); }
+#terbit::before { background: var(--light-cyan); }
+#dzuhur::before { background: var(--emerald-green); }
+#ashar::before { background: #FF9800; } /* Orange */
+#maghrib::before { background: #E91E63; } /* Pink */
+#isya::before { background: #2196F3; } /* Blue */
+
+.prayer-item.active::before {
+    width: 8px;
+}
+
+.prayer-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-white);
+}
+
+.prayer-time {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--soft-gold);
+    text-shadow: 0 0 10px rgba(255, 213, 79, 0.3);
+}
+
+.prayer-status {
+    font-size: 0.9rem;
+    color: var(--light-cyan);
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 5px;
+    min-height: 18px;
+}
+
+/* Panel Jam */
+.clock-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* Jam Digital Kecil */
+.digital-clock-small {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    color: var(--soft-gold);
+    text-shadow: 0 0 10px rgba(255, 213, 79, 0.5);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.colon {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+/* Jam Analog Besar */
+.analog-clock {
+    width: 350px;
+    height: 350px;
+    position: relative;
+}
+
+.clock-face {
+    width: 100%;
+    height: 100%;
+    border: 8px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Markers */
+.marker {
+    position: absolute;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    color: var(--text-white);
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.marker-12 { top: 20px; left: 50%; transform: translateX(-50%); }
+.marker-3 { top: 50%; right: 20px; transform: translateY(-50%); }
+.marker-6 { bottom: 20px; left: 50%; transform: translateX(-50%); }
+.marker-9 { top: 50%; left: 20px; transform: translateY(-50%); }
+
+/* Clock Hands */
+.hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom;
+    border-radius: 10px 10px 0 0;
+    transform: translateX(-50%);
+    transition: transform 0.05s cubic-bezier(0.4, 2.3, 0.8, 1);
+}
+
+.hour-hand {
+    width: 8px;
+    height: 30%;
+    background: var(--soft-gold);
+    z-index: 3;
+    box-shadow: 0 0 10px rgba(255, 213, 79, 0.5);
+}
+
+.minute-hand {
+    width: 6px;
+    height: 40%;
+    background: var(--light-cyan);
+    z-index: 2;
+    box-shadow: 0 0 10px rgba(128, 222, 234, 0.5);
+}
+
+.second-hand {
+    width: 3px;
+    height: 45%;
+    background: var(--primary-purple);
+    z-index: 1;
+    box-shadow: 0 0 10px rgba(106, 27, 154, 0.5);
+}
+
+.center-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: var(--soft-gold);
+    border-radius: 50%;
+    z-index: 4;
+    box-shadow: 0 0 10px rgba(255, 213, 79, 0.8);
+}
+
+/* Tanggal Hijriah */
+.hijri-date {
+    font-size: 1.4rem;
+    color: var(--light-cyan);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px 25px;
+    border-radius: 25px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+/* Footer dengan Quote */
+.footer {
+    margin-top: 30px;
+    padding: 15px 0;
+}
+
+.quote-marquee {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.quote-text {
+    font-size: 1.2rem;
+    color: var(--soft-gold);
+    font-style: italic;
+    text-align: center;
+    white-space: nowrap;
+    animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* Kontrol Panel */
+.control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.control-panel:hover {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    display: block;
+    color: var(--light-cyan);
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+#city-selector,
+#background-selector {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+    font-family: 'Poppins', sans-serif;
+}
+
+.control-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--emerald-green);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.control-btn:hover {
+    background: var(--primary-purple);
+}
+
+/* Notifikasi */
+.notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    border: 3px solid var(--soft-gold);
+    border-radius: 20px;
+    padding: 30px;
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+    animation: notificationPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 400px;
+    text-align: center;
+}
+
+@keyframes notificationPop {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.5); 
+        opacity: 0; 
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1); 
+        opacity: 1; 
     }
 }
 
-// Update Jam Analog
-function updateAnalogClock(time) {
-    const seconds = time.getSeconds();
-    const minutes = time.getMinutes();
-    const hours = time.getHours() % 12;
-    
-    const secondDegrees = ((seconds / 60) * 360) + 90;
-    const minuteDegrees = ((minutes / 60) * 360) + ((seconds / 60) * 6) + 90;
-    const hourDegrees = ((hours / 12) * 360) + ((minutes / 60) * 30) + 90;
-    
-    document.getElementById('second-hand').style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
-    document.getElementById('minute-hand').style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
-    document.getElementById('hour-hand').style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
 }
 
-// Update Tanggal
-function updateDates() {
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const gregorianDate = now.toLocaleDateString('id-ID', options);
-    document.getElementById('today-date').textContent = gregorianDate;
-    
-    // Tanggal Hijriah (simulasi)
-    const hijriDate = calculateHijriDate(now);
-    document.getElementById('hijri-date').textContent = hijriDate;
+.notification-icon {
+    font-size: 3rem;
+    color: var(--soft-gold);
+    animation: bellRing 2s ease-in-out infinite;
 }
 
-// Kalkulasi Tanggal Hijriah (simplified)
-function calculateHijriDate(gregorianDate) {
-    const startIslamic = new Date(622, 6, 16);
-    const diffTime = gregorianDate - startIslamic;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    const islamicYear = Math.floor(diffDays / 354.367) + 1;
-    const islamicMonth = Math.floor((diffDays % 354.367) / 29.53) + 1;
-    const islamicDay = Math.floor((diffDays % 354.367) % 29.53) + 1;
-    
-    const months = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 
-                   'Jumadil Akhir', 'Rajab', 'Sya\'ban', 'Ramadhan', 'Syawal', 
-                   'Dzulqa\'dah', 'Dzulhijjah'];
-    
-    return `${islamicDay} ${months[islamicMonth - 1]} ${islamicYear} H`;
+@keyframes bellRing {
+    0%, 50%, 100% { transform: rotate(0); }
+    5%, 15% { transform: rotate(-10deg); }
+    10%, 20% { transform: rotate(10deg); }
 }
 
-// Toggle Fullscreen
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.log(`Error attempting to enable fullscreen: ${err.message}`);
-        });
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
+.notification-text h3 {
+    color: var(--soft-gold);
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.notification-text p {
+    color: var(--light-cyan);
+    font-size: 1.1rem;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 280px 1fr;
+        gap: 30px;
+    }
+    
+    .masjid-name {
+        font-size: 2.8rem;
+    }
+    
+    .analog-clock {
+        width: 300px;
+        height: 300px;
     }
 }
 
-// Ganti Background
-function changeBackground(backgroundId) {
-    const backgroundImage = backgroundImages[backgroundId];
-    if (backgroundImage) {
-        document.getElementById('background-image').style.backgroundImage = `url('${backgroundImage}')`;
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        gap: 30px;
+    }
+    
+    .prayer-panel {
+        order: 2;
+    }
+    
+    .clock-panel {
+        order: 1;
+    }
+    
+    .masjid-name {
+        font-size: 2.2rem;
+    }
+    
+    .analog-clock {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .prayer-item {
+        padding: 12px 15px;
+    }
+    
+    .prayer-name {
+        font-size: 1.1rem;
+    }
+    
+    .prayer-time {
+        font-size: 1.2rem;
     }
 }
 
-// Load Jadwal Sholat dari API
-async function loadPrayerTimes() {
-    const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-    const apiUrl = `https://api.myquran.com/v1/sholat/jadwal/${currentCityId}/${today}`;
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
     
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        
-        if (data.status && data.data) {
-            prayerTimes = data.data.jadwal;
-            updatePrayerDisplay();
-        } else {
-            setFallbackPrayerTimes();
-        }
-    } catch (error) {
-        console.error('Error fetching prayer times:', error);
-        setFallbackPrayerTimes();
+    .masjid-name {
+        font-size: 1.8rem;
+    }
+    
+    .location-info {
+        font-size: 1.1rem;
+    }
+    
+    .analog-clock {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .clock-face {
+        border-width: 6px;
+    }
+    
+    .prayer-panel {
+        padding: 20px;
+    }
+    
+    .quote-text {
+        font-size: 1rem;
     }
 }
 
-// Update Tampilan Jadwal Sholat
-function updatePrayerDisplay() {
-    const prayers = ['subuh', 'terbit', 'dzuhur', 'ashar', 'maghrib', 'isya'];
+/* Mode Landscape untuk Layar Lebar */
+@media (min-width: 1200px) and (orientation: landscape) {
+    .container {
+        padding: 40px;
+    }
     
-    prayers.forEach(prayer => {
-        if (prayerTimes[prayer]) {
-            document.getElementById(`${prayer}-time`).textContent = prayerTimes[prayer];
-        }
-    });
+    .main-content {
+        gap: 80px;
+    }
     
-    updateCurrentPrayerStatus();
-}
-
-// Data Fallback jika API error
-function setFallbackPrayerTimes() {
-    prayerTimes = {
-        subuh: '04:23',
-        terbit: '05:38',
-        dzuhur: '11:56',
-        ashar: '15:10',
-        maghrib: '18:07',
-        isya: '19:19'
-    };
-    updatePrayerDisplay();
-}
-
-// Update Status Sholat Saat Ini
-function updateCurrentPrayerStatus() {
-    const now = currentTime;
-    const currentTimeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                          now.getMinutes().toString().padStart(2, '0');
-    
-    const prayers = [
-        { name: 'subuh', time: prayerTimes.subuh },
-        { name: 'terbit', time: prayerTimes.terbit },
-        { name: 'dzuhur', time: prayerTimes.dzuhur },
-        { name: 'ashar', time: prayerTimes.ashar },
-        { name: 'maghrib', time: prayerTimes.maghrib },
-        { name: 'isya', time: prayerTimes.isya }
-    ];
-    
-    // Reset semua status
-    prayers.forEach(prayer => {
-        const item = document.getElementById(prayer.name);
-        const status = document.getElementById(`${prayer.name}-status`);
-        
-        item.classList.remove('active');
-        status.textContent = '';
-    });
-    
-    // Cari sholat yang sedang aktif
-    for (let i = 0; i < prayers.length; i++) {
-        const currentPrayer = prayers[i];
-        const nextPrayer = prayers[i + 1];
-        
-        if (currentTimeStr >= currentPrayer.time && 
-            (!nextPrayer || currentTimeStr < nextPrayer.time)) {
-            
-            const item = document.getElementById(currentPrayer.name);
-            const status = document.getElementById(`${currentPrayer.name}-status`);
-            
-            item.classList.add('active');
-            status.textContent = 'WAKTU SHOLAT SAAT INI';
-            
-            break;
-        }
+    .analog-clock {
+        width: 400px;
+        height: 400px;
     }
 }
-
-// Cek Waktu Sholat untuk Notifikasi
-function checkPrayerTime() {
-    const now = new Date();
-    const currentTimeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                          now.getMinutes().toString().padStart(2, '0');
-    
-    const prayers = [
-        { name: 'Subuh', time: prayerTimes.subuh },
-        { name: 'Dzuhur', time: prayerTimes.dzuhur },
-        { name: 'Ashar', time: prayerTimes.ashar },
-        { name: 'Maghrib', time: prayerTimes.maghrib },
-        { name: 'Isya', time: prayerTimes.isya }
-    ];
-    
-    prayers.forEach(prayer => {
-        if (currentTimeStr === prayer.time) {
-            showPrayerNotification(prayer.name, prayer.time);
-        }
-    });
-}
-
-// Tampilkan Notifikasi Waktu Sholat
-function showPrayerNotification(prayerName, prayerTime) {
-    const notification = document.getElementById('prayer-notification');
-    const message = document.getElementById('notification-message');
-    
-    message.textContent = `Sudah masuk waktu ${prayerName} - ${prayerTime} ${cities[currentCityId].timezone}`;
-    notification.classList.remove('hidden');
-    
-    // Otomatis tutup setelah 30 detik
-    setTimeout(() => {
-        notification.classList.add('hidden');
-    }, 30000);
-}
-
-// Update Quote Islami
-function updateQuote() {
-    const randomQuote = islamicQuotes[Math.floor(Math.random() * islamicQuotes.length)];
-    document.getElementById('quote-text').textContent = `"${randomQuote}"`;
-    
-    // Update quote setiap 1 jam
-    setTimeout(updateQuote, 3600000);
-}
-
-// Handle Visibility Change
-document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-        updateClock();
-        loadPrayerTimes();
-    }
-});
