@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // API endpoints
-    const KOTA_API = 'https://api.myquran.com/sholat/kota/semua';
-    const JADWAL_API = 'https://api.myquran.com/sholat/jadwal/';
+    const KOTA_API = 'https://api.myquran.com/v2/sholat/kota/semua';
+    const JADWAL_API = 'https://api.myquran.com/v2/sholat/jadwal/';
     
     // Elements
     const citySelect = document.getElementById('citySelect');
