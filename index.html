@@ -150,6 +150,10 @@
         <button id="fullscreen-btn" class="control-btn">
             <i class="fas fa-expand"></i> Fullscreen
         </button>
+
+        <button id="refresh-btn" class="control-btn">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+        </button>
     </div>
 
     <!-- Notifikasi Waktu Sholat -->
@@ -162,7 +166,16 @@
                 <h3>Waktu Sholat</h3>
                 <p id="notification-message">Sudah masuk waktu Maghrib</p>
             </div>
+            <button id="close-notification" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="loading-indicator hidden">
+        <div class="spinner"></div>
+        <p>Memuat data sholat...</p>
     </div>
 
     <script src="script.js"></script>
