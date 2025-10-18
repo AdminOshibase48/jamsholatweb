@@ -3,24 +3,77 @@ let currentCityId = '1301'; // Default: Jakarta
 let prayerTimes = {};
 let currentTime = new Date();
 let timezoneOffset = 7; // Default WIB
+let apiRetryCount = 0;
+const MAX_RETRIES = 3;
 
-// Daftar kota Indonesia (ID dari API MyQuran v2)
+// Daftar kota Indonesia dengan multiple API endpoints
 const cities = {
-    '1301': { name: 'Jakarta', timezone: 'WIB' },
-    '1871': { name: 'Bandung', timezone: 'WIB' },
-    '3173': { name: 'Surabaya', timezone: 'WIB' },
-    '2171': { name: 'Medan', timezone: 'WIB' },
-    '5171': { name: 'Denpasar', timezone: 'WITA' },
-    '7371': { name: 'Makassar', timezone: 'WITA' },
-    '9271': { name: 'Jayapura', timezone: 'WIT' }
+    '1301': { 
+        name: 'Jakarta', 
+        timezone: 'WIB',
+        endpoints: [
+            // Multiple API endpoints untuk redundancy
+            `https://api.myquran.com/v1/sholat/jadwal/1301/${getTodayDate()}`,
+            `https://api.aladhan.com/v1/timingsByCity?city=Jakarta&country=Indonesia&method=2`,
+            `https://api.banghasan.com/sholat/format/json/jadwal/kota/1301/tanggal/${getTodayDate()}`
+        ]
+    },
+    '1871': { 
+        name: 'Bandung', 
+        timezone: 'WIB',
+        endpoints: [
+            `https://api.myquran.com/v1/sholat/jadwal/1871/${getTodayDate()}`,
+            `https://api.aladhan.com/v1/timingsByCity?city=Bandung&country=Indonesia&method=2`
+        ]
+    },
+    '3173': { 
+        name: 'Surabaya', 
+        timezone: 'WIB',
+        endpoints: [
+            `https://api.myquran.com/v1/sholat/jadwal/3173/${getTodayDate()}`,
+            `https://api.aladhan.com/v1/timingsByCity?city=Surabaya&country=Indonesia&method=2`
+        ]
+    },
+    '2171': { 
+        name: 'Medan', 
+        timezone: 'WIB',
+        endpoints: [
+            `https://api.myquran.com/v1/sholat/jadwal/2171/${getTodayDate()}`,
+            `https://api.aladhan.com/v1/timingsByCity?city=Medan&country=Indonesia&method=2`
+        ]
+    },
+    '5171': { 
+        name: 'Denpasar', 
+        timezone: 'WITA',
+        endpoints: [
+            `https://api.myquran.com/v1/sholat/jadwal/5171/${getTodayDate()}`,
+            `https://api.aladhan.com/v1/timingsByCity?city=Denpasar&country=Indonesia&method=2`
+        ]
+    },
+    '7371': { 
+        name: 'Makassar', 
+        timezone: 'WITA',
+        endpoints: [
+            `https://api.myquran.com/v1/sholat/jadwal/7371/${getTodayDate()}`,
+            `https://api.aladhan.com/v1/timingsByCity?city=Makassar&country=Indonesia&method=2`
+        ]
+    },
+    '9271': { 
+        name: 'Jayapura', 
+        timezone: 'WIT',
+        endpoints: [
+            `https://api.myquran.com/v1/sholat/jadwal/9271/${getTodayDate()}`,
+            `https://api.aladhan.com/v1/timingsByCity?city=Jayapura&country=Indonesia&method=2`
+        ]
+    }
 };
 
 // Background images untuk masjid
 const backgroundImages = {
-    '1': 'https://images.unsplash.com/photo-1543362427-5afb5c4b2c43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    '2': 'https://images.unsplash.com/photo-1580330510113-812f89ea3173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    '3': 'https://images.unsplash.com/photo-1601599561213-832382fd07ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80',
-    '4': 'https://images.unsplash.com/photo-1566379078573-26ae3b236fa4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
+    '1': 'https://images.unsplash.com/photo-1543362427-5afb5c4b2c43?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+    '2': 'https://images.unsplash.com/photo-1580330510113-812f89ea3173?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+    '3': 'https://images.unsplash.com/photo-1601599561213-832382fd07ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=2064&q=80',
+    '4': 'https://images.unsplash.com/photo-1566379078573-26ae3b236fa4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'
 };
 
 // Quote Islami
@@ -32,6 +85,47 @@ const islamicQuotes = [
     "Amal yang pertama kali dihisab pada hari kiamat adalah shalat.",
     "Shalat itu cahaya, sedekah itu bukti, sabar itu sinar, dan Al-Qur'an itu hujjah untukmu atau terhadapmu."
 ];
+
+// Data fallback untuk setiap kota (jika semua API gagal)
+const fallbackPrayerTimes = {
+    '1301': { // Jakarta
+        subuh: '04:30', terbit: '05:45', dzuhur: '11:55', 
+        ashar: '15:15', maghrib: '18:10', isya: '19:25'
+    },
+    '1871': { // Bandung
+        subuh: '04:25', terbit: '05:40', dzuhur: '11:50', 
+        ashar: '15:10', maghrib: '18:05', isya: '19:20'
+    },
+    '3173': { // Surabaya
+        subuh: '04:15', terbit: '05:30', dzuhur: '11:40', 
+        ashar: '15:00', maghrib: '17:55', isya: '19:10'
+    },
+    '2171': { // Medan
+        subuh: '05:00', terbit: '06:15', dzuhur: '12:25', 
+        ashar: '15:45', maghrib: '18:40', isya: '19:55'
+    },
+    '5171': { // Denpasar (WITA)
+        subuh: '05:00', terbit: '06:15', dzuhur: '12:25', 
+        ashar: '15:45', maghrib: '18:40', isya: '19:55'
+    },
+    '7371': { // Makassar (WITA)
+        subuh: '04:45', terbit: '06:00', dzuhur: '12:10', 
+        ashar: '15:30', maghrib: '18:25', isya: '19:40'
+    },
+    '9271': { // Jayapura (WIT)
+        subuh: '04:30', terbit: '05:45', dzuhur: '11:55', 
+        ashar: '15:15', maghrib: '18:10', isya: '19:25'
+    }
+};
+
+// Helper function untuk format tanggal
+function getTodayDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}/${month}/${day}`;
+}
 
 // Inisialisasi
 document.addEventListener('DOMContentLoaded', function() {
@@ -65,6 +159,16 @@ function setupEventListeners() {
     
     // Fullscreen
     document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+    
+    // Refresh data
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        loadPrayerTimes();
+    });
+    
+    // Tutup notifikasi
+    document.getElementById('close-notification').addEventListener('click', function() {
+        document.getElementById('prayer-notification').classList.add('hidden');
+    });
 }
 
 // Update Informasi Lokasi
@@ -172,19 +276,44 @@ function changeBackground(backgroundId) {
     }
 }
 
-// Load Jadwal Sholat dari API MyQuran v2 - FIXED
+// Load Jadwal Sholat dengan multiple API fallback
 async function loadPrayerTimes() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+    showLoading(true);
+    apiRetryCount = 0;
     
-    // Menggunakan API v2 yang benar
-    const apiUrl = `https://api.myquran.com/v2/sholat/jadwal/${currentCityId}/${year}/${month}/${day}`;
-    
+    const city = cities[currentCityId];
+    if (!city) {
+        setFallbackPrayerTimes();
+        showLoading(false);
+        return;
+    }
+
+    // Coba semua endpoints sampai berhasil
+    for (let endpoint of city.endpoints) {
+        try {
+            console.log(`Mencoba API: ${endpoint}`);
+            const success = await tryApiEndpoint(endpoint);
+            if (success) {
+                showLoading(false);
+                return;
+            }
+        } catch (error) {
+            console.log(`API ${endpoint} gagal:`, error);
+            continue;
+        }
+    }
+
+    // Jika semua API gagal, gunakan fallback
+    console.log('Semua API gagal, menggunakan data fallback');
+    setFallbackPrayerTimes();
+    showLoading(false);
+    showTemporaryNotification('Menggunakan data sholat offline');
+}
+
+// Coba satu endpoint API
+async function tryApiEndpoint(url) {
     try {
-        console.log('Fetching prayer times from:', apiUrl);
-        const response = await fetch(apiUrl);
+        const response = await fetch(url);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -192,17 +321,46 @@ async function loadPrayerTimes() {
         
         const data = await response.json();
         
-        if (data.status && data.data) {
-            prayerTimes = data.data.jadwal;
-            updatePrayerDisplay();
-            console.log('Prayer times loaded successfully:', prayerTimes);
-        } else {
-            throw new Error('Invalid API response format');
+        // Handle different API response formats
+        if (url.includes('myquran.com')) {
+            // Format MyQuran v1
+            if (data.status && data.data && data.data.jadwal) {
+                prayerTimes = data.data.jadwal;
+                updatePrayerDisplay();
+                console.log('MyQuran API berhasil:', prayerTimes);
+                return true;
+            }
+        } else if (url.includes('aladhan.com')) {
+            // Format Aladhan
+            if (data.data && data.data.timings) {
+                const timings = data.data.timings;
+                prayerTimes = {
+                    subuh: timings.Fajr,
+                    terbit: timings.Sunrise,
+                    dzuhur: timings.Dhuhr,
+                    ashar: timings.Asr,
+                    maghrib: timings.Maghrib,
+                    isya: timings.Isha
+                };
+                updatePrayerDisplay();
+                console.log('Aladhan API berhasil:', prayerTimes);
+                return true;
+            }
+        } else if (url.includes('banghasan.com')) {
+            // Format Banghasan
+            if (data.jadwal && data.jadwal.data) {
+                prayerTimes = data.jadwal.data;
+                updatePrayerDisplay();
+                console.log('Banghasan API berhasil:', prayerTimes);
+                return true;
+            }
         }
+        
+        throw new Error('Format response tidak dikenali');
+        
     } catch (error) {
-        console.error('Error fetching prayer times:', error);
-        setFallbackPrayerTimes();
-        showTemporaryNotification('Menggunakan data sholat offline');
+        console.error(`Error dengan endpoint ${url}:`, error);
+        return false;
     }
 }
 
@@ -212,23 +370,24 @@ function updatePrayerDisplay() {
     
     prayers.forEach(prayer => {
         if (prayerTimes[prayer]) {
-            document.getElementById(`${prayer}-time`).textContent = prayerTimes[prayer];
+            // Format waktu menjadi HH:MM
+            let time = prayerTimes[prayer];
+            if (time.includes(' ')) {
+                time = time.split(' ')[0]; // Ambil hanya bagian waktu jika ada timezone
+            }
+            if (time.length === 4) {
+                time = '0' + time; // Tambah 0 di depan jika hanya 4 digit
+            }
+            document.getElementById(`${prayer}-time`).textContent = time;
         }
     });
     
     updateCurrentPrayerStatus();
 }
 
-// Data Fallback jika API error
+// Data Fallback jika semua API error
 function setFallbackPrayerTimes() {
-    prayerTimes = {
-        subuh: '04:23',
-        terbit: '05:38',
-        dzuhur: '11:56',
-        ashar: '15:10',
-        maghrib: '18:07',
-        isya: '19:19'
-    };
+    prayerTimes = fallbackPrayerTimes[currentCityId] || fallbackPrayerTimes['1301'];
     updatePrayerDisplay();
 }
 
@@ -310,6 +469,16 @@ function showPrayerNotification(prayerName, prayerTime) {
     }, 30000);
 }
 
+// Tampilkan/Sembunyikan Loading
+function showLoading(show) {
+    const loader = document.getElementById('loading-indicator');
+    if (show) {
+        loader.classList.remove('hidden');
+    } else {
+        loader.classList.add('hidden');
+    }
+}
+
 // Notifikasi Sementara
 function showTemporaryNotification(message) {
     // Buat elemen notifikasi sementara
@@ -339,7 +508,9 @@ function showTemporaryNotification(message) {
         tempNotification.style.opacity = '0';
         tempNotification.style.transform = 'translate(-50%, -50%) scale(0.8)';
         setTimeout(() => {
-            document.body.removeChild(tempNotification);
+            if (document.body.contains(tempNotification)) {
+                document.body.removeChild(tempNotification);
+            }
         }, 300);
     }, 3000);
 }
@@ -357,14 +528,15 @@ function updateQuote() {
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         updateClock();
+        // Refresh data setiap kali tab aktif kembali
         loadPrayerTimes();
     }
 });
 
 // Handle Online/Offline Status
 window.addEventListener('online', function() {
-    loadPrayerTimes();
     showTemporaryNotification('Koneksi pulih, memperbarui data sholat');
+    loadPrayerTimes();
 });
 
 window.addEventListener('offline', function() {
