@@ -3,58 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Sholat</title>
+    <title>Jadwal Sholat TV Style</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1 class="title">Jadwal Sholat</h1>
-            <div class="date-display" id="currentDate"></div>
-        </header>
-        
-        <main class="main-content">
-            <div class="city-selector">
-                <label for="citySelect">Pilih Kota:</label>
-                <select id="citySelect">
-                    <option value="">Loading...</option>
-                </select>
-            </div>
+    <div class="tv-container">
+        <!-- Background dengan efek TV -->
+        <div class="tv-frame">
+            <div class="screen-overlay"></div>
             
-            <div class="prayer-times">
-                <div class="prayer-card" id="subuh">
-                    <h3>Subuh</h3>
-                    <div class="time" id="subuhTime">--:--</div>
+            <!-- Header dengan tanggal dan waktu -->
+            <header class="tv-header">
+                <div class="date-time">
+                    <div class="date" id="currentDate">Selasa, 1 Januari 2024</div>
+                    <div class="time" id="currentTime">00:00:00</div>
                 </div>
-                <div class="prayer-card" id="dzuhur">
-                    <h3>Dzuhur</h3>
-                    <div class="time" id="dzuhurTime">--:--</div>
+                <div class="title-section">
+                    <h1 class="main-title">JADWAL SHOLAT</h1>
+                    <div class="subtitle">Untuk Kota <span id="currentCity">Jakarta</span></div>
                 </div>
-                <div class="prayer-card" id="ashar">
-                    <h3>Ashar</h3>
-                    <div class="time" id="asharTime">--:--</div>
+                <div class="masjid-icon">
+                    <i class="fas fa-mosque"></i>
                 </div>
-                <div class="prayer-card" id="maghrib">
-                    <h3>Maghrib</h3>
-                    <div class="time" id="maghribTime">--:--</div>
+            </header>
+
+            <!-- Konten utama -->
+            <main class="tv-content">
+                <!-- Pilih Kota -->
+                <div class="city-selector-container">
+                    <div class="selector-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        PILIH KOTA
+                    </div>
+                    <select id="citySelect" class="city-selector">
+                        <option value="">Loading...</option>
+                    </select>
                 </div>
-                <div class="prayer-card" id="isya">
-                    <h3>Isya</h3>
-                    <div class="time" id="isyaTime">--:--</div>
+
+                <!-- Jadwal Sholat -->
+                <div class="prayer-schedule">
+                    <div class="prayer-item" data-prayer="subuh">
+                        <div class="prayer-name">
+                            <i class="fas fa-sun"></i>
+                            SUBUH
+                        </div>
+                        <div class="prayer-time" id="subuhTime">04:30</div>
+                        <div class="prayer-highlight"></div>
+                    </div>
+                    
+                    <div class="prayer-item" data-prayer="dzuhur">
+                        <div class="prayer-name">
+                            <i class="fas fa-sun"></i>
+                            DZUHUR
+                        </div>
+                        <div class="prayer-time" id="dzuhurTime">12:00</div>
+                        <div class="prayer-highlight"></div>
+                    </div>
+                    
+                    <div class="prayer-item" data-prayer="ashar">
+                        <div class="prayer-name">
+                            <i class="fas fa-sun"></i>
+                            ASHAR
+                        </div>
+                        <div class="prayer-time" id="asharTime">15:30</div>
+                        <div class="prayer-highlight"></div>
+                    </div>
+                    
+                    <div class="prayer-item" data-prayer="maghrib">
+                        <div class="prayer-name">
+                            <i class="fas fa-moon"></i>
+                            MAGHRIB
+                        </div>
+                        <div class="prayer-time" id="maghribTime">18:15</div>
+                        <div class="prayer-highlight"></div>
+                    </div>
+                    
+                    <div class="prayer-item" data-prayer="isya">
+                        <div class="prayer-name">
+                            <i class="fas fa-moon"></i>
+                            ISYA
+                        </div>
+                        <div class="prayer-time" id="isyaTime">19:30</div>
+                        <div class="prayer-highlight"></div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="mosque-images">
-                <div class="image-container">
-                    <img src="https://cdn.pixabay.com/photo/2018/09/09/14/32/u-a-e-3664712_1280.jpg" alt="Masjid 1" class="mosque-img">
+
+                <!-- Gambar Masjid -->
+                <div class="mosque-gallery">
+                    <div class="gallery-item">
+                        <img src="https://cdn.pixabay.com/photo/2018/09/09/14/32/u-a-e-3664712_1280.jpg" alt="Masjid 1" class="mosque-image">
+                        <div class="image-overlay">
+                            <i class="fas fa-mosque"></i>
+                            <span>Masjid Agung</span>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://cdn.pixabay.com/photo/2020/02/20/03/24/nabawi-mosque-4863805_960_720.jpg" alt="Masjid 2" class="mosque-image">
+                        <div class="image-overlay">
+                            <i class="fas fa-mosque"></i>
+                            <span>Masjid Nabawi</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="image-container">
-                    <img src="https://cdn.pixabay.com/photo/2020/02/20/03/24/nabawi-mosque-4863805_960_720.jpg" alt="Masjid 2" class="mosque-img">
+            </main>
+
+            <!-- Footer -->
+            <footer class="tv-footer">
+                <div class="footer-text">
+                    <i class="fas fa-quran"></i>
+                    "Sesungguhnya sholat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman"
+                    <i class="fas fa-quran"></i>
                 </div>
-            </div>
-        </main>
+                <div class="scroll-text">
+                    <marquee behavior="scroll" direction="left">
+                        Jadwal sholat ini menggunakan API dari myQuran.com • Selamat menunaikan ibadah sholat •
+                        Semoga kita selalu dalam lindungan Allah SWT • Jadwal sholat ini menggunakan API dari myQuran.com
+                    </marquee>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Efek scanlines TV -->
+        <div class="scanlines"></div>
     </div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>
