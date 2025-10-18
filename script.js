@@ -16,6 +16,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const maghribTime = document.getElementById('maghribTime');
     const isyaTime = document.getElementById('isyaTime');
 
+    // Countdown elements
+    const subuhCountdown = document.getElementById('subuhCountdown');
+    const dzuhurCountdown = document.getElementById('dzuhurCountdown');
+    const asharCountdown = document.getElementById('asharCountdown');
+    const maghribCountdown = document.getElementById('maghribCountdown');
+    const isyaCountdown = document.getElementById('isyaCountdown');
+
+    // Notification elements
+    const adzanNotification = document.getElementById('adzanNotification');
+    const closeNotification = document.getElementById('closeNotification');
+    const notificationPrayer = document.getElementById('notificationPrayer');
+    const notificationCountdown = document.getElementById('notificationCountdown');
+    const notificationIcon = document.getElementById('notificationIcon');
+    const playAdzan = document.getElementById('playAdzan');
+    const stopAdzan = document.getElementById('stopAdzan');
+    const adzanAudio = document.getElementById('adzanAudio');
+
     // Default times sebagai fallback
     const defaultTimes = {
         subuh: '04:30',
@@ -24,6 +41,11 @@ document.addEventListener('DOMContentLoaded', function() {
         maghrib: '18:15',
         isya: '19:30'
     };
+
+    // Variabel untuk notifikasi
+    let notificationTimeout;
+    let currentNotificationPrayer = '';
+    const NOTIFICATION_TIMES = [30, 15, 10, 5, 1]; // menit sebelum adzan
 
     // Set default times
     subuhTime.textContent = defaultTimes.subuh;
@@ -54,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${year}-${month}-${day}`;
     }
     
-    // Load cities - DIPERBAIKI
+    // Load cities
     async function loadCities() {
         try {
             console.log('Memuat data kota...');
@@ -77,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear loading option
             citySelect.innerHTML = '<option value="">Pilih Kota</option>';
             
-            // Add cities to dropdown - DIPERBAIKI: forEach bukan fortach
+            // Add cities to dropdown
             cities.forEach(city => {
                 const option = document.createElement('option');
                 option.value = city.id;
@@ -135,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Menggunakan data fallback');
     }
     
-    // Load prayer times - DIPERBAIKI
+    // Load prayer times
     async function loadPrayerTimes(cityId) {
         try {
             const formattedDate = getFormattedDate();
@@ -161,8 +183,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 animateTimeUpdate(maghribTime, jadwal.maghrib || defaultTimes.maghrib);
                 animateTimeUpdate(isyaTime, jadwal.isya || defaultTimes.isya);
                 
-                // Highlight current prayer time
-                highlightCurrentPrayer();
+                // Start countdown monitoring
+                startCountdownMonitoring();
+                
             } else {
                 throw new Error('Format data jadwal tidak valid');
             }
@@ -177,6 +200,9 @@ document.addEventListener('DOMContentLoaded', function() {
             animateTimeUpdate(isyaTime, defaultTimes.isya);
             
             currentCityElement.textContent = 'Data Offline';
+            
+            // Start countdown dengan waktu default
+            startCountdownMonitoring();
         }
     }
     
@@ -192,6 +218,192 @@ document.addEventListener('DOMContentLoaded', function() {
             element.style.transform = 'scale(1)';
             element.style.color = '#ffd54f';
         }, 300);
+    }
+
+    // Start monitoring countdown untuk semua sholat
+    function startCountdownMonitoring() {
+        // Update countdown setiap detik
+        setInterval(() => {
+            updateAllCountdowns();
+            checkNotifications();
+        }, 1000);
+        
+        // Update awal
+        updateAllCountdowns();
+    }
+
+    // Update countdown untuk semua sholat
+    function updateAllCountdowns() {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        
+        const prayers = [
+            { name: 'subuh', element: subuhTime, countdown: subuhCountdown },
+            { name: 'dzuhur', element: dzuhurTime, countdown: dzuhurCountdown },
+            { name: 'ashar', element: asharTime, countdown: asharCountdown },
+            { name: 'maghrib', element: maghribTime, countdown: maghribCountdown },
+            { name: 'isya', element: isyaTime, countdown: isyaCountdown }
+        ];
+
+        prayers.forEach(prayer => {
+            const prayerTime = convertTimeToMinutes(prayer.element.textContent);
+            const timeDiff = prayerTime - currentTime;
+            
+            if (timeDiff > 0 && timeDiff <= 60) { // Tampilkan jika <= 60 menit
+                prayer.countdown.textContent = `${timeDiff}m`;
+                prayer.countdown.style.display = 'block';
+                
+                if (timeDiff <= 5) {
+                    prayer.countdown.classList.add('countdown-urgent');
+                } else {
+                    prayer.countdown.classList.remove('countdown-urgent');
+                }
+            } else {
+                prayer.countdown.style.display = 'none';
+                prayer.countdown.classList.remove('countdown-urgent');
+            }
+        });
+
+        highlightCurrentPrayer();
+    }
+
+    // Check untuk menampilkan notifikasi
+    function checkNotifications() {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        
+        const prayers = [
+            { name: 'subuh', displayName: 'SHOLAT SUBUH', element: subuhTime, icon: 'fas fa-sun' },
+            { name: 'dzuhur', displayName: 'SHOLAT DZUHUR', element: dzuhurTime, icon: 'fas fa-sun' },
+            { name: 'ashar', displayName: 'SHOLAT ASHAR', element: asharTime, icon: 'fas fa-sun' },
+            { name: 'maghrib', displayName: 'SHOLAT MAGHRIB', element: maghribTime, icon: 'fas fa-moon' },
+            { name: 'isya', displayName: 'SHOLAT ISYA', element: isyaTime, icon: 'fas fa-moon' }
+        ];
+
+        prayers.forEach(prayer => {
+            const prayerTime = convertTimeToMinutes(prayer.element.textContent);
+            const timeDiff = prayerTime - currentTime;
+            
+            // Cek jika waktu sudah sesuai untuk notifikasi
+            NOTIFICATION_TIMES.forEach(notifTime => {
+                if (timeDiff === notifTime && currentNotificationPrayer !== prayer.name) {
+                    showNotification(prayer, timeDiff);
+                    currentNotificationPrayer = prayer.name;
+                    
+                    // Reset current notification setelah 1 menit
+                    setTimeout(() => {
+                        currentNotificationPrayer = '';
+                    }, 60000);
+                }
+            });
+
+            // Notifikasi saat waktu sholat tiba
+            if (timeDiff === 0) {
+                showAdzanTimeNotification(prayer);
+            }
+        });
+    }
+
+    // Show notification popup
+    function showNotification(prayer, minutesLeft) {
+        notificationPrayer.textContent = prayer.displayName;
+        notificationIcon.className = prayer.icon;
+        
+        let countdownText = '';
+        if (minutesLeft === 1) {
+            countdownText = '1 menit lagi';
+        } else if (minutesLeft === 0) {
+            countdownText = 'Waktu sholat telah tiba!';
+        } else {
+            countdownText = `${minutesLeft} menit lagi`;
+        }
+        
+        notificationCountdown.textContent = countdownText;
+        
+        // Show notification
+        adzanNotification.classList.add('show');
+        
+        // Auto close setelah 10 detik, kecuali untuk 1 menit terakhir
+        if (minutesLeft > 1) {
+            clearTimeout(notificationTimeout);
+            notificationTimeout = setTimeout(() => {
+                adzanNotification.classList.remove('show');
+            }, 10000);
+        }
+        
+        // Show toast notification juga
+        showToastNotification(prayer.displayName, minutesLeft);
+    }
+
+    // Show notification ketika waktu adzan tiba
+    function showAdzanTimeNotification(prayer) {
+        notificationPrayer.textContent = prayer.displayName;
+        notificationCountdown.textContent = 'WAKTU SHOLAT TELAH TIBA!';
+        notificationIcon.className = prayer.icon;
+        
+        adzanNotification.classList.add('show');
+        
+        // Otomatis putar adzan
+        playAdzanSound();
+        
+        // Tidak auto close untuk notifikasi waktu sholat
+        clearTimeout(notificationTimeout);
+        
+        // Show urgent toast
+        showToastNotification(prayer.displayName, 0, true);
+    }
+
+    // Show toast notification
+    function showToastNotification(prayerName, minutesLeft, isUrgent = false) {
+        const toast = document.createElement('div');
+        toast.className = 'adzan-toast';
+        
+        let message = '';
+        if (minutesLeft === 0) {
+            message = `🏷️ ${prayerName} - WAKTU SHOLAT TELAH TIBA!`;
+            toast.classList.add('urgent');
+        } else if (minutesLeft === 1) {
+            message = `⏰ ${prayerName} - 1 menit lagi!`;
+            toast.classList.add('warning');
+        } else {
+            message = `⏰ ${prayerName} - ${minutesLeft} menit lagi`;
+        }
+        
+        toast.innerHTML = `
+            <i class="fas ${minutesLeft === 0 ? 'fa-bell' : 'fa-clock'}"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Show toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // Auto remove setelah 5 detik
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 400);
+        }, 5000);
+    }
+
+    // Play adzan sound
+    function playAdzanSound() {
+        adzanAudio.currentTime = 0;
+        adzanAudio.play().catch(e => {
+            console.log('Autoplay diblokir:', e);
+        });
+    }
+
+    // Stop adzan sound
+    function stopAdzanSound() {
+        adzanAudio.pause();
+        adzanAudio.currentTime = 0;
     }
     
     // Highlight current prayer time
@@ -256,12 +468,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return hours * 60 + minutes;
     }
     
-    // Event listener untuk city selection - DIPERBAIKI
+    // Event Listeners
     citySelect.addEventListener('change', function() {
         if (this.value) {
             loadPrayerTimes(this.value);
         }
     });
+
+    closeNotification.addEventListener('click', function() {
+        adzanNotification.classList.remove('show');
+        stopAdzanSound();
+    });
+
+    playAdzan.addEventListener('click', playAdzanSound);
+    stopAdzan.addEventListener('click', stopAdzanSound);
     
     // Add hover effects untuk prayer items
     document.querySelectorAll('.prayer-item').forEach(item => {
@@ -279,13 +499,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     updateDateTime();
     setInterval(updateDateTime, 1000);
-    
-    // Update current prayer highlight every minute
-    setInterval(() => {
-        if (citySelect.value) {
-            highlightCurrentPrayer();
-        }
-    }, 60000);
     
     // Load cities setelah delay kecil untuk memastikan DOM siap
     setTimeout(() => {
