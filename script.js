@@ -1,50 +1,14 @@
 // Konfigurasi dan Variabel Global
-let currentCityId = '1301'; // Default: Jakarta
+let currentCityId = '';
 let prayerTimes = {};
 let currentTime = new Date();
 let timezoneOffset = 7; // Default WIB
+let allCities = [];
 
-// Daftar kota Indonesia
-const cities = {
-    '1301': { name: 'Jakarta', timezone: 'WIB' },
-    '1871': { name: 'Bandung', timezone: 'WIB' },
-    '3173': { name: 'Surabaya', timezone: 'WIB' },
-    '2171': { name: 'Medan', timezone: 'WIB' },
-    '5171': { name: 'Denpasar', timezone: 'WITA' },
-    '7371': { name: 'Makassar', timezone: 'WITA' },
-    '9271': { name: 'Jayapura', timezone: 'WIT' }
-};
-
-// Data fallback untuk setiap kota
-const fallbackPrayerTimes = {
-    '1301': { // Jakarta
-        subuh: '04:30', terbit: '05:45', dzuhur: '11:55', 
-        ashar: '15:10', maghrib: '18:05', isya: '19:20'
-    },
-    '1871': { // Bandung
-        subuh: '04:25', terbit: '05:40', dzuhur: '11:50', 
-        ashar: '15:05', maghrib: '18:00', isya: '19:15'
-    },
-    '3173': { // Surabaya
-        subuh: '04:15', terbit: '05:30', dzuhur: '11:40', 
-        ashar: '15:00', maghrib: '17:55', isya: '19:10'
-    },
-    '2171': { // Medan
-        subuh: '05:00', terbit: '06:15', dzuhur: '12:25', 
-        ashar: '15:40', maghrib: '18:35', isya: '19:50'
-    },
-    '5171': { // Denpasar (WITA)
-        subuh: '05:00', terbit: '06:15', dzuhur: '12:25', 
-        ashar: '15:45', maghrib: '18:40', isya: '19:55'
-    },
-    '7371': { // Makassar (WITA)
-        subuh: '04:45', terbit: '06:00', dzuhur: '12:10', 
-        ashar: '15:30', maghrib: '18:25', isya: '19:40'
-    },
-    '9271': { // Jayapura (WIT)
-        subuh: '04:30', terbit: '05:45', dzuhur: '11:55', 
-        ashar: '15:15', maghrib: '18:10', isya: '19:25'
-    }
+// Background images untuk masjid
+const backgroundImages = {
+    '1': 'https://cdn.pixabay.com/photo/2018/09/09/14/32/u-a-e-3664712_1280.jpg',
+    '2': 'https://cdn.pixabay.com/photo/2020/02/20/03/24/nabawi-mosque-4863805_960_720.jpg'
 };
 
 // Quote Islami
@@ -57,6 +21,18 @@ const islamicQuotes = [
     "Shalat itu cahaya, sedekah itu bukti, sabar itu sinar, dan Al-Qur'an itu hujjah untukmu atau terhadapmu."
 ];
 
+// Data fallback untuk setiap kota
+const fallbackPrayerTimes = {
+    '1301': { // Jakarta
+        subuh: '04:30', terbit: '05:45', dzuhur: '11:55', 
+        ashar: '15:10', maghrib: '18:05', isya: '19:20'
+    },
+    '1871': { // Bandung
+        subuh: '04:25', terbit: '05:40', dzuhur: '11:50', 
+        ashar: '15:05', maghrib: '18:00', isya: '19:15'
+    }
+};
+
 // Inisialisasi
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -65,10 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Inisialisasi Aplikasi
-function initializeApp() {
+async function initializeApp() {
     setupEventListeners();
-    updateLocationInfo();
-    loadPrayerTimes();
+    await loadCities();
     updateQuote();
     updateDates();
 }
@@ -82,12 +57,19 @@ function setupEventListeners() {
         loadPrayerTimes();
     });
     
+    // Pilih background
+    document.getElementById('background-selector').addEventListener('change', function(e) {
+        changeBackground(e.target.value);
+    });
+    
     // Fullscreen
     document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
     
     // Refresh data
     document.getElementById('refresh-btn').addEventListener('click', function() {
-        loadPrayerTimes();
+        if (currentCityId) {
+            loadPrayerTimes();
+        }
     });
     
     // Tutup notifikasi
@@ -96,17 +78,61 @@ function setupEventListeners() {
     });
 }
 
+// Load Daftar Kota dari API
+async function loadCities() {
+    try {
+        const response = await fetch('https://api.myquran.com/v1/sholat/kota/semua');
+        
+        if (response.ok) {
+            const data = await response.json();
+            allCities = data.data;
+            
+            // Update dropdown kota
+            const citySelector = document.getElementById('city-selector');
+            citySelector.innerHTML = '<option value="">Pilih Kota</option>';
+            
+            allCities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.id;
+                option.textContent = city.lokasi;
+                citySelector.appendChild(option);
+            });
+            
+            // Set default ke Jakarta jika ada
+            const jakarta = allCities.find(city => city.lokasi === 'Jakarta');
+            if (jakarta) {
+                currentCityId = jakarta.id;
+                citySelector.value = jakarta.id;
+                updateLocationInfo();
+                loadPrayerTimes();
+            }
+        } else {
+            throw new Error('Gagal memuat daftar kota');
+        }
+    } catch (error) {
+        console.error('Error loading cities:', error);
+        document.getElementById('city-selector').innerHTML = '<option value="">Error loading cities</option>';
+    }
+}
+
 // Update Informasi Lokasi
 function updateLocationInfo() {
-    const city = cities[currentCityId];
+    const city = allCities.find(c => c.id == currentCityId);
     if (city) {
-        document.getElementById('location-name').textContent = city.name;
-        document.getElementById('timezone').textContent = city.timezone;
+        document.getElementById('location-name').textContent = city.lokasi;
         
-        // Update timezone offset berdasarkan kota
-        if (city.timezone === 'WITA') timezoneOffset = 8;
-        else if (city.timezone === 'WIT') timezoneOffset = 9;
-        else timezoneOffset = 7;
+        // Tentukan timezone berdasarkan longitude (sederhana)
+        const lon = parseFloat(city.koordinat.lon);
+        if (lon >= 115 && lon < 130) {
+            document.getElementById('timezone').textContent = 'WITA';
+            timezoneOffset = 8;
+        } else if (lon >= 130) {
+            document.getElementById('timezone').textContent = 'WIT';
+            timezoneOffset = 9;
+        } else {
+            document.getElementById('timezone').textContent = 'WIB';
+            timezoneOffset = 7;
+        }
     }
 }
 
@@ -165,7 +191,6 @@ function updateDates() {
 
 // Kalkulasi Tanggal Hijriah
 function calculateHijriDate(gregorianDate) {
-    // Simplified calculation - in real app use proper library
     const startIslamic = new Date(622, 6, 16);
     const diffTime = gregorianDate - startIslamic;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -194,15 +219,25 @@ function toggleFullscreen() {
     }
 }
 
-// Load Jadwal Sholat - SIMPLE VERSION
+// Ganti Background
+function changeBackground(backgroundId) {
+    const backgroundImage = backgroundImages[backgroundId];
+    if (backgroundImage) {
+        document.getElementById('background-image').style.backgroundImage = `url('${backgroundImage}')`;
+    }
+}
+
+// Load Jadwal Sholat dari API
 async function loadPrayerTimes() {
+    if (!currentCityId) return;
+    
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
+    const date = `${year}/${month}/${day}`;
     
-    // Coba MyQuran API v1 (tanpa API key)
-    const apiUrl = `https://api.myquran.com/v1/sholat/jadwal/${currentCityId}/${year}/${month}/${day}`;
+    const apiUrl = `https://api.myquran.com/v1/sholat/jadwal/${currentCityId}/${date}`;
     
     try {
         console.log('Mengambil data dari:', apiUrl);
@@ -316,7 +351,10 @@ function showPrayerNotification(prayerName, prayerTime) {
     const notification = document.getElementById('prayer-notification');
     const message = document.getElementById('notification-message');
     
-    message.textContent = `Sudah masuk waktu ${prayerName} - ${prayerTime} ${cities[currentCityId].timezone}`;
+    const city = allCities.find(c => c.id == currentCityId);
+    const timezone = city ? (timezoneOffset === 8 ? 'WITA' : timezoneOffset === 9 ? 'WIT' : 'WIB') : 'WIB';
+    
+    message.textContent = `Sudah masuk waktu ${prayerName} - ${prayerTime} ${timezone}`;
     notification.classList.remove('hidden');
     
     // Otomatis tutup setelah 30 detik
