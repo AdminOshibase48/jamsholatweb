@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jam Sholat Digital 2025</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="masjid-name">MASJID AL-ISTIQOMAH</h1>
+            <div class="location-info">
+                <span id="location-name">Jakarta</span>
+                <span id="timezone">WIB</span>
+            </div>
+        </div>
+        
+        <!-- Jam Digital Utama -->
+        <div class="main-clock">
+            <div id="digital-clock" class="digital-clock">
+                <span class="time-hours">00</span>
+                <span class="time-colon">:</span>
+                <span class="time-minutes">00</span>
+                <span class="time-colon">:</span>
+                <span class="time-seconds">00</span>
+            </div>
+            <div class="date-info">
+                <span id="gregorian-date">Senin, 1 Januari 2025</span>
+                <span id="hijri-date">1 Muharram 1446 H</span>
+            </div>
+            <div class="clock-toggle">
+                <button id="toggle-format" class="toggle-btn">24 JAM</button>
+                <button id="fullscreen-btn" class="toggle-btn"><i class="fas fa-expand"></i></button>
+            </div>
+        </div>
+        
+        <!-- Jadwal Sholat -->
+        <div class="prayer-times">
+            <div class="prayer-card" id="subuh">
+                <div class="prayer-name">SUBUH</div>
+                <div class="prayer-time" id="subuh-time">04:30</div>
+                <div class="prayer-status" id="subuh-status"></div>
+            </div>
+            <div class="prayer-card" id="dzuhur">
+                <div class="prayer-name">DZUHUR</div>
+                <div class="prayer-time" id="dzuhur-time">12:00</div>
+                <div class="prayer-status" id="dzuhur-status"></div>
+            </div>
+            <div class="prayer-card" id="ashar">
+                <div class="prayer-name">ASHAR</div>
+                <div class="prayer-time" id="ashar-time">15:30</div>
+                <div class="prayer-status" id="ashar-status"></div>
+            </div>
+            <div class="prayer-card" id="maghrib">
+                <div class="prayer-name">MAGHRIB</div>
+                <div class="prayer-time" id="maghrib-time">18:15</div>
+                <div class="prayer-status" id="maghrib-status"></div>
+            </div>
+            <div class="prayer-card" id="isya">
+                <div class="prayer-name">ISYA</div>
+                <div class="prayer-time" id="isya-time">19:30</div>
+                <div class="prayer-status" id="isya-status"></div>
+            </div>
+        </div>
+        
+        <!-- Quote Islami -->
+        <div class="quote-section">
+            <p id="islamic-quote">"Sesungguhnya shalat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman." (QS. An-Nisa: 103)</p>
+        </div>
+        
+        <!-- Kontrol Lokasi -->
+        <div class="location-control">
+            <select id="city-selector">
+                <option value="1301">Jakarta</option>
+                <option value="1871">Bandung</option>
+                <option value="3173">Surabaya</option>
+                <option value="2171">Medan</option>
+                <option value="5171">Denpasar</option>
+                <option value="7371">Makassar</option>
+                <option value="9271">Jayapura</option>
+            </select>
+            <button id="auto-location" class="location-btn"><i class="fas fa-location-arrow"></i> Lokasi Otomatis</button>
+        </div>
+        
+        <!-- Notifikasi Waktu Sholat -->
+        <div id="prayer-notification" class="notification hidden">
+            <div class="notification-content">
+                <i class="fas fa-mosque"></i>
+                <div class="notification-text">
+                    <h3>Waktu Sholat</h3>
+                    <p id="notification-message">Sudah masuk waktu Maghrib</p>
+                </div>
+                <button id="close-notification" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
