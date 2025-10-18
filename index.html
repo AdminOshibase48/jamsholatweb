@@ -122,28 +122,31 @@
         </footer>
     </div>
 
-    <!-- Kontrol Panel (Tersembunyi sampai dihover) -->
+    <!-- Kontrol Panel -->
     <div class="control-panel">
         <div class="control-group">
             <label for="city-selector">Pilih Kota:</label>
             <select id="city-selector">
-                <option value="1301">Jakarta</option>
-                <option value="1871">Bandung</option>
-                <option value="3173">Surabaya</option>
-                <option value="2171">Medan</option>
-                <option value="5171">Denpasar</option>
-                <option value="7371">Makassar</option>
-                <option value="9271">Jayapura</option>
+                <option value="">Loading kota...</option>
             </select>
         </div>
         
-        <button id="fullscreen-btn" class="control-btn">
-            <i class="fas fa-expand"></i> Fullscreen
-        </button>
-
-        <button id="refresh-btn" class="control-btn">
-            <i class="fas fa-sync-alt"></i> Refresh
-        </button>
+        <div class="control-group">
+            <label for="background-selector">Background:</label>
+            <select id="background-selector">
+                <option value="1">Masjid Modern</option>
+                <option value="2">Masjid Nabawi</option>
+            </select>
+        </div>
+        
+        <div class="control-buttons">
+            <button id="fullscreen-btn" class="control-btn">
+                <i class="fas fa-expand"></i> Fullscreen
+            </button>
+            <button id="refresh-btn" class="control-btn">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
     </div>
 
     <!-- Notifikasi Waktu Sholat -->
