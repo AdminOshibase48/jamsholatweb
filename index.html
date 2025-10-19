@@ -134,30 +134,65 @@
         <div class="scanlines"></div>
     </div>
 
-    <!-- Popup Notifikasi Adzan -->
-    <div id="adzanNotification" class="adzan-notification">
-        <div class="notification-content">
-            <div class="notification-header">
-                <i class="fas fa-bell"></i>
+    <!-- Popup Notifikasi Countdown -->
+    <div id="countdownNotification" class="countdown-notification">
+        <div class="countdown-content">
+            <div class="countdown-header">
+                <i class="fas fa-clock"></i>
                 <h3>Pengingat Sholat</h3>
-                <button class="close-btn" id="closeNotification">&times;</button>
+                <button class="close-btn" id="closeCountdown">&times;</button>
             </div>
-            <div class="notification-body">
-                <div class="prayer-info">
-                    <i class="fas fa-mosque" id="notificationIcon"></i>
-                    <div class="prayer-details">
-                        <div class="prayer-name" id="notificationPrayer">SHOLAT SUBUH</div>
-                        <div class="countdown-text" id="notificationCountdown">10 menit lagi</div>
+            <div class="countdown-body">
+                <div class="countdown-info">
+                    <i class="fas fa-mosque" id="countdownIcon"></i>
+                    <div class="countdown-details">
+                        <div class="prayer-name" id="countdownPrayer">SHOLAT SUBUH</div>
+                        <div class="countdown-timer" id="countdownTimer">10:00</div>
+                        <div class="countdown-text" id="countdownText">menit lagi</div>
                     </div>
                 </div>
-                <div class="audio-controls">
-                    <button id="playAdzan" class="audio-btn">
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Adzan Besar -->
+    <div id="adzanNotification" class="adzan-notification">
+        <div class="adzan-overlay"></div>
+        <div class="adzan-content">
+            <div class="adzan-header">
+                <div class="moon-star"></div>
+                <h1 class="adzan-title">WAKTU SHOLAT</h1>
+                <div class="moon-star"></div>
+            </div>
+            
+            <div class="adzan-body">
+                <div class="prayer-display">
+                    <i class="fas fa-mosque" id="adzanIcon"></i>
+                    <h2 id="adzanPrayer">SHOLAT SUBUH</h2>
+                    <div class="adzan-time" id="adzanTime">04:30</div>
+                </div>
+                
+                <div class="arabic-text">
+                    <p>حَيَّ عَلَى الصَّلَاةِ</p>
+                    <p class="translation">Mari menunaikan sholat</p>
+                </div>
+                
+                <div class="adzan-controls">
+                    <button id="playAdzan" class="adzan-btn primary">
                         <i class="fas fa-play"></i> Putar Adzan
                     </button>
-                    <button id="stopAdzan" class="audio-btn stop">
-                        <i class="fas fa-stop"></i> Stop
+                    <button id="stopAdzan" class="adzan-btn secondary">
+                        <i class="fas fa-stop"></i> Berhenti
+                    </button>
+                    <button id="snoozeAdzan" class="adzan-btn tertiary">
+                        <i class="fas fa-bell-slash"></i> Ingatkan 5 Menit Lagi
                     </button>
                 </div>
+            </div>
+            
+            <div class="adzan-footer">
+                <p>"Dirikanlah sholat, sesungguhnya sholat itu mencegah perbuatan keji dan mungkar"</p>
+                <p class="surah">(QS. Al-Ankabut: 45)</p>
             </div>
         </div>
     </div>
