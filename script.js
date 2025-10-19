@@ -24,13 +24,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const isyaCountdown = document.getElementById('isyaCountdown');
 
     // Notification elements
+    const countdownNotification = document.getElementById('countdownNotification');
+    const closeCountdown = document.getElementById('closeCountdown');
+    const countdownPrayer = document.getElementById('countdownPrayer');
+    const countdownTimer = document.getElementById('countdownTimer');
+    const countdownText = document.getElementById('countdownText');
+    const countdownIcon = document.getElementById('countdownIcon');
+
     const adzanNotification = document.getElementById('adzanNotification');
-    const closeNotification = document.getElementById('closeNotification');
-    const notificationPrayer = document.getElementById('notificationPrayer');
-    const notificationCountdown = document.getElementById('notificationCountdown');
-    const notificationIcon = document.getElementById('notificationIcon');
+    const adzanPrayer = document.getElementById('adzanPrayer');
+    const adzanTime = document.getElementById('adzanTime');
+    const adzanIcon = document.getElementById('adzanIcon');
     const playAdzan = document.getElementById('playAdzan');
     const stopAdzan = document.getElementById('stopAdzan');
+    const snoozeAdzan = document.getElementById('snoozeAdzan');
     const adzanAudio = document.getElementById('adzanAudio');
 
     // Default times sebagai fallback
@@ -43,9 +50,11 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Variabel untuk notifikasi
-    let notificationTimeout;
-    let currentNotificationPrayer = '';
-    const NOTIFICATION_TIMES = [30, 15, 10, 5, 1]; // menit sebelum adzan
+    let countdownInterval;
+    let currentCountdownPrayer = '';
+    let currentCountdownTime = 0;
+    let snoozeTimeout;
+    const NOTIFICATION_TIMES = [30, 15, 10, 5]; // menit sebelum adzan
 
     // Set default times
     subuhTime.textContent = defaultTimes.subuh;
@@ -284,112 +293,87 @@ document.addEventListener('DOMContentLoaded', function() {
             const prayerTime = convertTimeToMinutes(prayer.element.textContent);
             const timeDiff = prayerTime - currentTime;
             
-            // Cek jika waktu sudah sesuai untuk notifikasi
+            // Cek jika waktu sudah sesuai untuk notifikasi countdown
             NOTIFICATION_TIMES.forEach(notifTime => {
-                if (timeDiff === notifTime && currentNotificationPrayer !== prayer.name) {
-                    showNotification(prayer, timeDiff);
-                    currentNotificationPrayer = prayer.name;
+                if (timeDiff === notifTime && currentCountdownPrayer !== prayer.name) {
+                    showCountdownNotification(prayer, timeDiff);
+                    currentCountdownPrayer = prayer.name;
                     
                     // Reset current notification setelah 1 menit
                     setTimeout(() => {
-                        currentNotificationPrayer = '';
+                        currentCountdownPrayer = '';
                     }, 60000);
                 }
             });
 
             // Notifikasi saat waktu sholat tiba
             if (timeDiff === 0) {
-                showAdzanTimeNotification(prayer);
+                showAdzanNotification(prayer);
             }
         });
     }
 
-    // Show notification popup
-    function showNotification(prayer, minutesLeft) {
-        notificationPrayer.textContent = prayer.displayName;
-        notificationIcon.className = prayer.icon;
+    // Show countdown notification
+    function showCountdownNotification(prayer, minutesLeft) {
+        countdownPrayer.textContent = prayer.displayName;
+        countdownIcon.className = prayer.icon;
         
-        let countdownText = '';
-        if (minutesLeft === 1) {
-            countdownText = '1 menit lagi';
-        } else if (minutesLeft === 0) {
-            countdownText = 'Waktu sholat telah tiba!';
-        } else {
-            countdownText = `${minutesLeft} menit lagi`;
+        // Set countdown timer
+        currentCountdownTime = minutesLeft * 60;
+        updateCountdownTimer();
+        
+        // Start countdown interval
+        clearInterval(countdownInterval);
+        countdownInterval = setInterval(updateCountdownTimer, 1000);
+        
+        // Show notification
+        countdownNotification.classList.add('show');
+        
+        // Auto close setelah countdown selesai
+        setTimeout(() => {
+            countdownNotification.classList.remove('show');
+            clearInterval(countdownInterval);
+        }, (minutesLeft * 60 + 1) * 1000);
+    }
+
+    // Update countdown timer
+    function updateCountdownTimer() {
+        if (currentCountdownTime <= 0) {
+            clearInterval(countdownInterval);
+            return;
         }
         
-        notificationCountdown.textContent = countdownText;
+        const minutes = Math.floor(currentCountdownTime / 60);
+        const seconds = currentCountdownTime % 60;
+        
+        countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (minutes === 0) {
+            countdownText.textContent = 'detik lagi';
+            countdownTimer.style.color = '#f44336';
+        } else {
+            countdownText.textContent = 'menit lagi';
+            countdownTimer.style.color = '#4fc3f7';
+        }
+        
+        currentCountdownTime--;
+    }
+
+    // Show adzan notification (popup besar)
+    function showAdzanNotification(prayer) {
+        adzanPrayer.textContent = prayer.displayName;
+        adzanTime.textContent = prayer.element.textContent;
+        adzanIcon.className = prayer.icon;
         
         // Show notification
         adzanNotification.classList.add('show');
         
-        // Auto close setelah 10 detik, kecuali untuk 1 menit terakhir
-        if (minutesLeft > 1) {
-            clearTimeout(notificationTimeout);
-            notificationTimeout = setTimeout(() => {
-                adzanNotification.classList.remove('show');
-            }, 10000);
-        }
-        
-        // Show toast notification juga
-        showToastNotification(prayer.displayName, minutesLeft);
-    }
-
-    // Show notification ketika waktu adzan tiba
-    function showAdzanTimeNotification(prayer) {
-        notificationPrayer.textContent = prayer.displayName;
-        notificationCountdown.textContent = 'WAKTU SHOLAT TELAH TIBA!';
-        notificationIcon.className = prayer.icon;
-        
-        adzanNotification.classList.add('show');
-        
-        // Otomatis putar adzan
-        playAdzanSound();
-        
-        // Tidak auto close untuk notifikasi waktu sholat
-        clearTimeout(notificationTimeout);
-        
-        // Show urgent toast
-        showToastNotification(prayer.displayName, 0, true);
-    }
-
-    // Show toast notification
-    function showToastNotification(prayerName, minutesLeft, isUrgent = false) {
-        const toast = document.createElement('div');
-        toast.className = 'adzan-toast';
-        
-        let message = '';
-        if (minutesLeft === 0) {
-            message = `🏷️ ${prayerName} - WAKTU SHOLAT TELAH TIBA!`;
-            toast.classList.add('urgent');
-        } else if (minutesLeft === 1) {
-            message = `⏰ ${prayerName} - 1 menit lagi!`;
-            toast.classList.add('warning');
-        } else {
-            message = `⏰ ${prayerName} - ${minutesLeft} menit lagi`;
-        }
-        
-        toast.innerHTML = `
-            <i class="fas ${minutesLeft === 0 ? 'fa-bell' : 'fa-clock'}"></i>
-            <span>${message}</span>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        // Show toast
+        // Otomatis putar adzan setelah 2 detik
         setTimeout(() => {
-            toast.classList.add('show');
-        }, 100);
+            playAdzanSound();
+        }, 2000);
         
-        // Auto remove setelah 5 detik
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 400);
-        }, 5000);
+        // Tidak auto close - user harus menutup manual
     }
 
     // Play adzan sound
@@ -397,6 +381,8 @@ document.addEventListener('DOMContentLoaded', function() {
         adzanAudio.currentTime = 0;
         adzanAudio.play().catch(e => {
             console.log('Autoplay diblokir:', e);
+            // Fallback: show play button instruction
+            alert('Klik tombol "Putar Adzan" untuk mendengarkan adzan');
         });
     }
 
@@ -404,6 +390,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function stopAdzanSound() {
         adzanAudio.pause();
         adzanAudio.currentTime = 0;
+    }
+
+    // Snooze adzan (ingatkan 5 menit lagi)
+    function snoozeAdzanNotification() {
+        adzanNotification.classList.remove('show');
+        stopAdzanSound();
+        
+        // Tampilkan lagi setelah 5 menit
+        snoozeTimeout = setTimeout(() => {
+            adzanNotification.classList.add('show');
+            playAdzanSound();
+        }, 5 * 60 * 1000);
     }
     
     // Highlight current prayer time
@@ -475,13 +473,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    closeNotification.addEventListener('click', function() {
-        adzanNotification.classList.remove('show');
-        stopAdzanSound();
+    closeCountdown.addEventListener('click', function() {
+        countdownNotification.classList.remove('show');
+        clearInterval(countdownInterval);
     });
 
     playAdzan.addEventListener('click', playAdzanSound);
     stopAdzan.addEventListener('click', stopAdzanSound);
+    snoozeAdzan.addEventListener('click', snoozeAdzanNotification);
+    
+    // Close adzan notification ketika klik di luar
+    adzanNotification.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('show');
+            stopAdzanSound();
+        }
+    });
     
     // Add hover effects untuk prayer items
     document.querySelectorAll('.prayer-item').forEach(item => {
@@ -525,6 +532,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         .prayer-item {
             transition: all 0.3s ease;
+        }
+        
+        .countdown-urgent {
+            animation: urgentPulse 0.5s infinite alternate;
+        }
+        
+        @keyframes urgentPulse {
+            from {
+                background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+                transform: scale(1);
+            }
+            to {
+                background: linear-gradient(135deg, #ff5252, #d32f2f);
+                transform: scale(1.1);
+            }
         }
     `;
     document.head.appendChild(style);
